@@ -1,0 +1,28 @@
+# WordPress core - track everything except sensitive configs
+wp-config.php
+
+# Uploads (user media, managed separately)
+wp-content/uploads/
+
+# Cache & backup plugins
+wp-content/cache/
+wp-content/backup*/
+wp-content/upgrade/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (if using build tools)
+node_modules/
+package-lock.json
+
+# Logs
+*.log
+debug.log
