@@ -1,0 +1,39 @@
+name: Deploy to Vultr
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via rsync
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SERVER_IP }}
+          REMOTE_USER: root
+          SOURCE: "./"
+          TARGET: "/tmp/wp-deploy/"
+          EXCLUDE: ".git/, .github/, .gitignore, wp-config.php, wp-content/uploads/"
+
+      - name: Sync to WordPress container
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Sync files into WordPress container volume
+            docker cp /tmp/wp-deploy/. wordpress:/var/www/html/
+
+            # Fix ownership
+            docker exec wordpress chown -R www-data:www-data /var/www/html/
+
+            # Cleanup
+            rm -rf /tmp/wp-deploy/
+
+            echo "Deploy complete: $(date)"
